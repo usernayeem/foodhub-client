@@ -25,3 +25,32 @@ export interface MealFilterState {
   maxPrice?: number;
   sortBy: "newest" | "price-asc" | "price-desc";
 }
+
+export enum OrderStatus {
+  PLACED = "PLACED",
+  PREPARING = "PREPARING",
+  READY = "READY",
+  DELIVERED = "DELIVERED",
+  CANCELLED = "CANCELLED",
+}
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  mealId: string;
+  meal?: Meal; // Relationship
+  quantity: number;
+  price: number;
+}
+
+export interface Order {
+  id: string;
+  customerId: string;
+  providerId: string;
+  deliveryAddress: string;
+  totalAmount: number;
+  status: OrderStatus;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}
