@@ -19,11 +19,6 @@ const providerLinks = [
         label: "Orders",
         icon: ShoppingBag,
     },
-    {
-        href: "/provider/settings",
-        label: "Settings",
-        icon: Settings,
-    },
 ];
 
 export function ProviderSidebar() {

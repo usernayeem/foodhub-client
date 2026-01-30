@@ -20,14 +20,9 @@ const adminLinks = [
         icon: ShoppingBag,
     },
     {
-        href: "/admin/meals",
-        label: "Meals",
+        href: "/admin/categories",
+        label: "Categories",
         icon: Utensils,
-    },
-    {
-        href: "/admin/settings",
-        label: "Settings",
-        icon: Settings,
     },
 ];
 

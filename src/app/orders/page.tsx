@@ -36,8 +36,21 @@ export default function OrdersPage() {
     };
 
     useEffect(() => {
-        if (!isPending && !session) {
-            router.push("/login?redirect=/orders");
+        if (!isPending) {
+            if (!session) {
+                router.push("/login?redirect=/orders");
+            } else {
+                const user = session.user as any;
+                if (user.role !== "CUSTOMER") {
+                    if (user.role === "PROVIDER") {
+                        router.push("/provider");
+                    } else if (user.role === "ADMIN") {
+                        router.push("/admin");
+                    } else {
+                        router.push("/");
+                    }
+                }
+            }
         }
     }, [isPending, session, router]);
 

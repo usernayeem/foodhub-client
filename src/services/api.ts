@@ -89,10 +89,72 @@ export const ProviderService = {
         });
 
         if (!res.ok) {
-            throw new Error("Failed to fetch provider stats");
+            throw new Error(`Failed to fetch provider stats: ${res.status} ${res.statusText}`);
         }
 
         return await res.json();
+    },
+
+    async getMeals(): Promise<Meal[]> {
+        const res = await fetch(`${API_URL}/meals/my-meals`, {
+            credentials: "include",
+            cache: "no-store"
+        });
+        if (!res.ok) throw new Error(`Failed to fetch provider meals: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        return data.data;
+    },
+
+    async createMeal(data: any): Promise<Meal> {
+        const res = await fetch(`${API_URL}/meals`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to create meal");
+        const dataRes = await res.json();
+        return dataRes.data;
+    },
+
+    async updateMeal(id: string, data: any): Promise<Meal> {
+        const res = await fetch(`${API_URL}/meals/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to update meal");
+        const dataRes = await res.json();
+        return dataRes.data;
+    },
+
+    async deleteMeal(id: string): Promise<void> {
+        const res = await fetch(`${API_URL}/meals/${id}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to delete meal");
+    },
+
+    async getOrders(): Promise<any[]> { // refine type
+        const res = await fetch(`${API_URL}/orders/my-orders`, {
+            credentials: "include",
+            cache: "no-store"
+        });
+        if (!res.ok) throw new Error(`Failed to fetch provider orders: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        return data.data;
+    },
+
+    async updateOrderStatus(id: string, status: string): Promise<void> {
+        const res = await fetch(`${API_URL}/orders/${id}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to update order status");
     }
 };
 
@@ -144,6 +206,69 @@ export const AdminService = {
         }
 
         return await res.json();
+    },
+
+    async getAllUsers(): Promise<any[]> {
+        const res = await fetch(`${API_URL}/admin/users`, {
+            credentials: "include",
+            cache: "no-store"
+        });
+        if (!res.ok) throw new Error(`Failed to fetch users: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        return data.data;
+    },
+
+    async updateUserStatus(userId: string, status: string): Promise<any> {
+        const res = await fetch(`${API_URL}/admin/users/${userId}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to update user status");
+        return await res.json();
+    },
+
+    async getAllOrders(): Promise<any[]> {
+        const res = await fetch(`${API_URL}/admin/orders`, {
+            credentials: "include",
+            cache: "no-store"
+        });
+        if (!res.ok) throw new Error(`Failed to fetch orders: ${res.status} ${res.statusText}`);
+        const data = await res.json();
+        return data.data;
+    },
+
+    async createCategory(data: { name: string; description?: string }): Promise<Category> {
+        const res = await fetch(`${API_URL}/categories`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to create category");
+        const result = await res.json();
+        return result.data;
+    },
+
+    async updateCategory(id: string, data: { name: string; description?: string }): Promise<Category> {
+        const res = await fetch(`${API_URL}/categories/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to update category");
+        const result = await res.json();
+        return result.data;
+    },
+
+    async deleteCategory(id: string): Promise<void> {
+        const res = await fetch(`${API_URL}/categories/${id}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to delete category");
     }
 };
 

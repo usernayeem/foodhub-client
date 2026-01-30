@@ -32,13 +32,15 @@ export function DashboardSidebar({ title, links }: SidebarProps) {
 
             {/* Mobile Menu Overlay */}
             {isMobileMenuOpen && (
-                <div className="md:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}>
+                <div className="md:hidden fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}>
                     <div className="absolute inset-y-0 left-0 w-3/4 bg-background border-r p-4" onClick={e => e.stopPropagation()}>
                         <div className="mb-8 font-bold text-xl">{title}</div>
                         <nav className="flex flex-col gap-2">
                             {links.map((link) => {
                                 const Icon = link.icon;
-                                const isActive = pathname === link.href;
+                                const isActive = link.href === "/provider" || link.href === "/admin"
+                                    ? pathname === link.href
+                                    : pathname.startsWith(link.href);
                                 return (
                                     <Button
                                         key={link.href}
@@ -68,7 +70,9 @@ export function DashboardSidebar({ title, links }: SidebarProps) {
                     <nav className="grid gap-1 px-2">
                         {links.map((link) => {
                             const Icon = link.icon;
-                            const isActive = pathname === link.href;
+                            const isActive = link.href === "/provider" || link.href === "/admin"
+                                ? pathname === link.href
+                                : pathname.startsWith(link.href);
                             return (
                                 <Button
                                     key={link.href}

@@ -2,15 +2,18 @@
 
 import Link from "next/link"
 import { useTheme } from "next-themes"
-import { Menu, Moon, Sun, ShoppingCart } from "lucide-react"
+import { Menu, Moon, Sun, ShoppingCart, LogOut } from "lucide-react"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { CartSheet } from "@/components/cart/CartSheet"
+import { authClient } from "@/lib/auth-client"
 
 export function Navbar() {
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const { data: session } = authClient.useSession()
+    const user = session?.user as any
 
     // Avoid hydration mismatch
     useEffect(() => {
@@ -35,18 +38,38 @@ export function Navbar() {
                         <Link href="/meals" className="text-sm font-medium hover:text-primary transition-colors">
                             Browse Meals
                         </Link>
-                        <Link href="/orders" className="text-sm font-medium hover:text-primary transition-colors">
-                            Orders
-                        </Link>
-                        <Link href="/profile" className="text-sm font-medium hover:text-primary transition-colors">
-                            Profile
-                        </Link>
-                        <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors">
-                            Login
-                        </Link>
-                        <Link href="/register" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
-                            Sign Up
-                        </Link>
+
+                        {user?.role === "CUSTOMER" && (
+                            <Link href="/orders" className="text-sm font-medium hover:text-primary transition-colors">
+                                Orders
+                            </Link>
+                        )}
+
+                        {(user?.role === "PROVIDER" || user?.role === "ADMIN") && (
+                            <Link
+                                href={user.role === "PROVIDER" ? "/provider" : "/admin"}
+                                className="text-sm font-medium hover:text-primary transition-colors"
+                            >
+                                Dashboard
+                            </Link>
+                        )}
+
+                        {session ? (
+                            <>
+                                <Link href="/profile" className="text-sm font-medium hover:text-primary transition-colors">
+                                    Profile
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors">
+                                    Login
+                                </Link>
+                                <Link href="/register" className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                                    Sign Up
+                                </Link>
+                            </>
+                        )}
 
                         <CartSheet />
 
@@ -96,20 +119,55 @@ export function Navbar() {
                         >
                             Browse Meals
                         </Link>
-                        <Link
-                            href="/login"
-                            className="block text-sm font-medium hover:text-primary transition-colors"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            Login
-                        </Link>
-                        <Link
-                            href="/register"
-                            className="block text-sm font-medium hover:text-primary transition-colors"
-                            onClick={() => setIsMenuOpen(false)}
-                        >
-                            Sign Up
-                        </Link>
+
+                        {user?.role === "CUSTOMER" && (
+                            <Link
+                                href="/orders"
+                                className="block text-sm font-medium hover:text-primary transition-colors"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                Orders
+                            </Link>
+                        )}
+
+                        {(user?.role === "PROVIDER" || user?.role === "ADMIN") && (
+                            <Link
+                                href={user.role === "PROVIDER" ? "/provider" : "/admin"}
+                                className="block text-sm font-medium hover:text-primary transition-colors"
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                Dashboard
+                            </Link>
+                        )}
+
+                        {session ? (
+                            <>
+                                <Link
+                                    href="/profile"
+                                    className="block text-sm font-medium hover:text-primary transition-colors"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    Profile
+                                </Link>
+                            </>
+                        ) : (
+                            <>
+                                <Link
+                                    href="/login"
+                                    className="block text-sm font-medium hover:text-primary transition-colors"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    Login
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className="block text-sm font-medium hover:text-primary transition-colors"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    Sign Up
+                                </Link>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
