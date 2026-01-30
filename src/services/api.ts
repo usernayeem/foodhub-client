@@ -41,6 +41,19 @@ export const MealService = {
         return data.data;
     },
 
+    async getMealById(id: string): Promise<Meal> {
+        const res = await fetch(`${API_URL}/meals/${id}`, {
+            cache: "no-store",
+        });
+
+        if (!res.ok) {
+            throw new Error("Failed to fetch meal");
+        }
+
+        const data = await res.json();
+        return data.data;
+    },
+
     async getCategories(): Promise<Category[]> {
         const res = await fetch(`${API_URL}/categories`);
         if (!res.ok) throw new Error("Failed to fetch categories");
