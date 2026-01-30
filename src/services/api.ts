@@ -61,3 +61,39 @@ export const MealService = {
         return data.data;
     }
 };
+
+export interface ProviderStats {
+    totalMeals: number;
+    availableMeals: number;
+    totalOrders: number;
+    pendingOrders: number;
+    completedOrders: number;
+    cancelledOrders: number;
+    totalRevenue: number;
+    totalReviews: number;
+    averageRating: number;
+}
+
+export interface ProviderDashboardData {
+    stats: ProviderStats;
+    recentOrders: any[]; // refine type later
+    topMeals: any[]; // refine type later
+}
+
+export const ProviderService = {
+    async getDashboardStats(): Promise<ProviderDashboardData> {
+        const res = await fetch(`${API_URL}/providers/dashboard/stats`, {
+            // credentials: "include" is crucial for sending cookies
+            credentials: "include",
+            cache: "no-store"
+        });
+
+        if (!res.ok) {
+            throw new Error("Failed to fetch provider stats");
+        }
+
+        return await res.json();
+    }
+};
+
+
