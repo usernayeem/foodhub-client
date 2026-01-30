@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { MealFilters } from "@/components/meals/MealFilters";
 import { MealGrid } from "@/components/meals/MealGrid";
+import { MealSkeleton } from "@/components/meals/MealSkeleton";
 import { Meal, MealFilterState } from "@/types";
 import { MealService } from "@/services/api";
 
@@ -50,7 +51,7 @@ export default function MealsPage() {
 
                 <main className="flex-1">
                     {loading ? (
-                        <div className="text-center py-12">Loading meals...</div>
+                        <MealSkeleton />
                     ) : (
                         <MealGrid meals={meals} />
                     )}
