@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,12 +8,30 @@ import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 interface MealCardProps {
     meal: Meal;
 }
 
 export function MealCard({ meal }: MealCardProps) {
+    const { addToCart } = useCart();
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+        // Prevent navigation to details page if clicking the add button
+        e.preventDefault();
+        e.stopPropagation();
+
+        addToCart({
+            mealId: meal.id,
+            name: meal.name,
+            price: meal.price,
+            image: meal.image,
+            providerId: meal.providerId,
+            quantity: 1
+        });
+    };
+
     return (
         <Card className="overflow-hidden flex flex-col h-full hover:shadow-lg transition-shadow group">
             <Link href={`/meals/${meal.id}`} className="block relative w-full h-48 overflow-hidden">
@@ -50,7 +70,11 @@ export function MealCard({ meal }: MealCardProps) {
                             View Details
                         </Link>
                     </Button>
-                    <Button className="flex-1" disabled={!meal.isAvailable}>
+                    <Button
+                        className="flex-1"
+                        disabled={!meal.isAvailable}
+                        onClick={handleAddToCart}
+                    >
                         <ShoppingCart className="mr-2 h-4 w-4" /> Add
                     </Button>
                 </div>

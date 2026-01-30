@@ -5,6 +5,7 @@ import { ThemeProvider } from "../components/theme-provider";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { Toaster } from "@/components/ui/toaster";
+import { CartProvider } from "@/context/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,12 +39,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main className="flex-1">
-            {children}
-          </main>
-          <Footer />
-          <Toaster />
+          <CartProvider>
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <Toaster />
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

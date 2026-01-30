@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, Clock, Utensils } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/context/CartContext";
 
 interface MealDetailProps {
     meal: Meal;
@@ -15,14 +15,17 @@ interface MealDetailProps {
 
 export function MealDetail({ meal }: MealDetailProps) {
     const [quantity, setQuantity] = useState(1);
-    const { toast } = useToast();
+    const { addToCart } = useCart();
 
     const handleAddToCart = () => {
-        toast({
-            title: "Added to cart",
-            description: `${quantity} x ${meal.name} added to your cart.`,
+        addToCart({
+            mealId: meal.id,
+            name: meal.name,
+            price: meal.price,
+            image: meal.image,
+            providerId: meal.providerId,
+            quantity: quantity
         });
-        // Logic to add to global cart context will be implemented later
     };
 
     return (

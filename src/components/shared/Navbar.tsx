@@ -5,6 +5,7 @@ import { useTheme } from "next-themes"
 import { Menu, Moon, Sun, ShoppingCart } from "lucide-react"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { CartSheet } from "@/components/cart/CartSheet"
 
 export function Navbar() {
     const { theme, setTheme } = useTheme()
@@ -41,6 +42,8 @@ export function Navbar() {
                             Sign Up
                         </Link>
 
+                        <CartSheet />
+
                         {/* Theme Toggle */}
                         <button
                             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -57,6 +60,7 @@ export function Navbar() {
 
                     {/* Mobile Menu Button */}
                     <div className="flex items-center gap-x-2 md:hidden">
+                        <CartSheet />
                         <button
                             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
                             className="inline-flex items-center justify-center rounded-md p-2 hover:bg-accent hover:text-accent-foreground"
