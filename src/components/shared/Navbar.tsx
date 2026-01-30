@@ -35,6 +35,9 @@ export function Navbar() {
                         <Link href="/meals" className="text-sm font-medium hover:text-primary transition-colors">
                             Browse Meals
                         </Link>
+                        <Link href="/profile" className="text-sm font-medium hover:text-primary transition-colors">
+                            Profile
+                        </Link>
                         <Link href="/login" className="text-sm font-medium hover:text-primary transition-colors">
                             Login
                         </Link>
