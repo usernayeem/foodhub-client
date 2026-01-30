@@ -5,7 +5,7 @@ import { ChangePasswordForm } from "@/components/profile/ChangePasswordForm";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Loader2, LogOut } from "lucide-react";
+import { Loader2, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
@@ -52,10 +52,23 @@ export default function ProfilePage() {
                     <h1 className="text-3xl font-bold">Account Settings</h1>
                     <p className="text-muted-foreground">Manage your account preferences and security.</p>
                 </div>
-                <Button variant="destructive" size="sm" onClick={handleSignOut} className="gap-2">
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
-                </Button>
+                <div className="flex flex-col items-center gap-3">
+                    {session.user?.image ? (
+                        <img
+                            src={session.user.image}
+                            alt={session.user.name || "Profile"}
+                            className="w-16 h-16 rounded-full object-cover border-2 border-border"
+                        />
+                    ) : (
+                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+                            <User className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                    )}
+                    <Button variant="destructive" size="sm" onClick={handleSignOut} className="gap-2">
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                    </Button>
+                </div>
             </div>
 
             <Separator />
