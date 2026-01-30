@@ -96,4 +96,55 @@ export const ProviderService = {
     }
 };
 
+export interface AdminDashboardData {
+    users: {
+        total: number;
+        customers: number;
+        providers: number;
+        admins: number;
+        active: number;
+        suspended: number;
+    };
+    orders: {
+        total: number;
+        placed: number;
+        preparing: number;
+        ready: number;
+        delivered: number;
+        cancelled: number;
+    };
+    revenue: {
+        total: number;
+        trend: any[];
+    };
+    meals: {
+        total: number;
+        available: number;
+    };
+    categories: {
+        total: number;
+    };
+    reviews: {
+        total: number;
+        averageRating: number;
+    };
+    recentOrders: any[];
+    topProviders: any[];
+}
+
+export const AdminService = {
+    async getDashboardStats(): Promise<AdminDashboardData> {
+        const res = await fetch(`${API_URL}/admin/dashboard/stats`, {
+            credentials: "include",
+            cache: "no-store"
+        });
+
+        if (!res.ok) {
+            throw new Error("Failed to fetch admin stats");
+        }
+
+        return await res.json();
+    }
+};
+
 
