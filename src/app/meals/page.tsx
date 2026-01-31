@@ -7,6 +7,8 @@ import { MealSkeleton } from "@/components/meals/MealSkeleton";
 import { Meal, MealFilterState } from "@/types";
 import { MealService } from "@/services/api";
 
+import { PaginationControls } from "@/components/ui/PaginationControls";
+
 export default function MealsPage() {
     const [filters, setFilters] = useState<MealFilterState>({
         search: "",
@@ -15,17 +17,27 @@ export default function MealsPage() {
     });
     const [meals, setMeals] = useState<Meal[]>([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+
+    // Reset page when filters change
+    useEffect(() => {
+        setPage(1);
+    }, [filters]);
 
     useEffect(() => {
         const fetchMeals = async () => {
             setLoading(true);
             try {
-                const data = await MealService.getAllMeals({
+                const response = await MealService.getAllMeals({
                     search: filters.search,
                     categoryId: filters.categoryId === "all" ? undefined : filters.categoryId,
-                    sortBy: filters.sortBy
+                    sortBy: filters.sortBy,
+                    page: page,
+                    limit: 9 // 3x3 grid
                 });
-                setMeals(data);
+                setMeals(response.data);
+                setTotalPages(response.meta.totalPages);
             } catch (error) {
                 console.error("Failed to fetch meals:", error);
             } finally {
@@ -38,7 +50,7 @@ export default function MealsPage() {
         }, 300); // 300ms debounce for search
 
         return () => clearTimeout(debounceTimer);
-    }, [filters]);
+    }, [filters, page]);
 
     return (
         <div className="container py-8 px-4 md:px-6">
@@ -53,7 +65,14 @@ export default function MealsPage() {
                     {loading ? (
                         <MealSkeleton />
                     ) : (
-                        <MealGrid meals={meals} />
+                        <>
+                            <MealGrid meals={meals} />
+                            <PaginationControls
+                                currentPage={page}
+                                totalPages={totalPages}
+                                onPageChange={setPage}
+                            />
+                        </>
                     )}
                 </main>
             </div>

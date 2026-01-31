@@ -9,10 +9,12 @@ export interface GetMealsParams {
     maxPrice?: number;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
+    page?: number;
+    limit?: number;
 }
 
 export const MealService = {
-    async getAllMeals(params?: GetMealsParams): Promise<Meal[]> {
+    async getAllMeals(params?: GetMealsParams): Promise<{ data: Meal[], meta: any }> {
         const query = new URLSearchParams();
         if (params?.search) query.append("search", params.search);
         if (params?.categoryId && params.categoryId !== "all") query.append("categoryId", params.categoryId);
@@ -29,16 +31,17 @@ export const MealService = {
             }
         }
 
-        const res = await fetch(`${API_URL}/meals?${query.toString()}`, {
-            cache: "no-store",
-        });
+        if (params?.page) query.append("page", params.page.toString());
+        if (params?.limit) query.append("limit", params.limit.toString());
+
+        const res = await fetch(`${API_URL}/meals?${query.toString()}`);
 
         if (!res.ok) {
             throw new Error("Failed to fetch meals");
         }
 
         const data = await res.json();
-        return data.data;
+        return data; // Returns { data: Meal[], meta: { total, page, limit, totalPages } }
     },
 
     async getMealById(id: string): Promise<Meal> {
@@ -95,14 +98,14 @@ export const ProviderService = {
         return await res.json();
     },
 
-    async getMeals(): Promise<Meal[]> {
-        const res = await fetch(`${API_URL}/meals/my-meals`, {
+    async getMeals(page = 1, limit = 10): Promise<{ data: Meal[], meta: any }> {
+        const query = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+        const res = await fetch(`${API_URL}/meals/my-meals?${query.toString()}`, {
             credentials: "include",
             cache: "no-store"
         });
         if (!res.ok) throw new Error(`Failed to fetch provider meals: ${res.status} ${res.statusText}`);
-        const data = await res.json();
-        return data.data;
+        return await res.json();
     },
 
     async createMeal(data: any): Promise<Meal> {
@@ -137,14 +140,14 @@ export const ProviderService = {
         if (!res.ok) throw new Error("Failed to delete meal");
     },
 
-    async getOrders(): Promise<any[]> { // refine type
-        const res = await fetch(`${API_URL}/orders/my-orders`, {
+    async getOrders(page = 1, limit = 10): Promise<{ data: any[], meta: any }> { // refine type
+        const query = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+        const res = await fetch(`${API_URL}/orders/my-orders?${query.toString()}`, {
             credentials: "include",
             cache: "no-store"
         });
         if (!res.ok) throw new Error(`Failed to fetch provider orders: ${res.status} ${res.statusText}`);
-        const data = await res.json();
-        return data.data;
+        return await res.json();
     },
 
     async updateOrderStatus(id: string, status: string): Promise<void> {
@@ -185,6 +188,7 @@ export interface AdminDashboardData {
     };
     categories: {
         total: number;
+        available: number; // Corrected field name based on typical usage or kept simple
     };
     reviews: {
         total: number;
@@ -208,14 +212,14 @@ export const AdminService = {
         return await res.json();
     },
 
-    async getAllUsers(): Promise<any[]> {
-        const res = await fetch(`${API_URL}/admin/users`, {
+    async getAllUsers(page = 1, limit = 10): Promise<{ data: any[], meta: any }> {
+        const query = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+        const res = await fetch(`${API_URL}/admin/users?${query.toString()}`, {
             credentials: "include",
             cache: "no-store"
         });
         if (!res.ok) throw new Error(`Failed to fetch users: ${res.status} ${res.statusText}`);
-        const data = await res.json();
-        return data.data;
+        return await res.json();
     },
 
     async updateUserStatus(userId: string, status: string): Promise<any> {

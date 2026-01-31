@@ -13,6 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { PaginationControls } from "@/components/ui/PaginationControls";
 
 interface User {
     id: string;
@@ -27,15 +28,18 @@ export default function AdminUsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         loadUsers();
-    }, []);
+    }, [page]);
 
     const loadUsers = async () => {
         try {
-            const data = await AdminService.getAllUsers();
-            setUsers(data);
+            const response = await AdminService.getAllUsers(page, 10);
+            setUsers(response.data);
+            setTotalPages(response.meta?.totalPages || 1);
         } catch (error) {
             console.error(error);
             toast({
@@ -144,6 +148,12 @@ export default function AdminUsersPage() {
                     </table>
                 </div>
             </div>
+
+            <PaginationControls
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+            />
 
             {users.length === 0 && (
                 <div className="text-center py-12">

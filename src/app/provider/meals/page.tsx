@@ -49,6 +49,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import Image from "next/image";
 import { uploadImage } from "@/lib/uploadImage";
+import { PaginationControls } from "@/components/ui/PaginationControls";
 
 const mealSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -70,6 +71,8 @@ export default function ProviderMealsPage() {
     const [imagePreview, setImagePreview] = useState<string>("");
     const [isUploading, setIsUploading] = useState(false);
     const { toast } = useToast();
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const form = useForm<MealFormValues>({
         resolver: zodResolver(mealSchema) as any,
@@ -84,7 +87,7 @@ export default function ProviderMealsPage() {
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [page]);
 
     useEffect(() => {
         if (editingMeal) {
@@ -109,10 +112,11 @@ export default function ProviderMealsPage() {
     const loadData = async () => {
         try {
             const [mealsData, categoriesData] = await Promise.all([
-                ProviderService.getMeals(),
+                ProviderService.getMeals(page, 9),
                 MealService.getCategories()
             ]);
-            setMeals(mealsData);
+            setMeals(mealsData.data);
+            setTotalPages(mealsData.meta?.totalPages || 1);
             setCategories(categoriesData);
         } catch (error) {
             console.error(error);
@@ -410,6 +414,12 @@ export default function ProviderMealsPage() {
                     </div>
                 ))}
             </div>
+
+            <PaginationControls
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+            />
 
             {meals.length === 0 && (
                 <div className="text-center py-12 border-2 border-dashed rounded-lg">

@@ -9,20 +9,26 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+import { PaginationControls } from "@/components/ui/PaginationControls";
+
 export default function OrdersPage() {
     const { data: session, isPending } = authClient.useSession();
     const router = useRouter();
     const [orders, setOrders] = useState<Order[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const fetchOrders = async () => {
         setIsLoading(true);
         try {
-            const response = await fetcher<{ data: Order[] }>("/orders/my-orders", {
+            const query = new URLSearchParams({ page: page.toString(), limit: "10" });
+            const response = await fetcher<{ data: Order[], meta: any }>(`/orders/my-orders?${query.toString()}`, {
                 credentials: "include"
             });
             setOrders(response.data);
+            setTotalPages(response.meta.totalPages);
         } catch (error) {
             console.error("Failed to fetch orders:", error);
             toast({
@@ -58,7 +64,7 @@ export default function OrdersPage() {
         if (session?.user) {
             fetchOrders();
         }
-    }, [session]);
+    }, [session, page]);
 
     if (isPending) {
         return (
@@ -80,6 +86,14 @@ export default function OrdersPage() {
             </div>
 
             <OrderList orders={orders} isLoading={isLoading} onRefresh={fetchOrders} />
+
+            {!isLoading && (
+                <PaginationControls
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                />
+            )}
         </div>
     );
 }
