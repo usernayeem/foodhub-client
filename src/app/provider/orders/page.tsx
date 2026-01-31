@@ -21,7 +21,7 @@ export default function ProviderOrdersPage() {
         try {
             const data = await ProviderService.getOrders();
             // Sort by newest first
-            const sorted = data.sort((a, b) =>
+            const sorted = (data.data || []).sort((a: any, b: any) =>
                 new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
             setOrders(sorted);
