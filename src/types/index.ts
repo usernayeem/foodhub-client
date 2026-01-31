@@ -55,3 +55,23 @@ export interface Order {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Review {
+  id: string;
+  mealId: string;
+  userId: string;
+  rating: number; // 1-5
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    image?: string;
+  };
+  meal?: {
+    id: string;
+    name: string;
+    image?: string;
+  };
+}

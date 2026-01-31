@@ -300,4 +300,72 @@ export const UserService = {
     }
 };
 
+export const ReviewService = {
+    async getMealReviews(mealId: string, page = 1, limit = 10): Promise<{ data: any[], meta: any }> {
+        const query = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString()
+        });
+        const res = await fetch(`${API_URL}/reviews/meals/${mealId}?${query.toString()}`, {
+            cache: "no-store"
+        });
+        if (!res.ok) throw new Error(`Failed to fetch meal reviews: ${res.status} ${res.statusText}`);
+        return await res.json();
+    },
+
+    async getMyReviews(page = 1, limit = 10): Promise<{ data: any[], meta: any }> {
+        const query = new URLSearchParams({
+            page: page.toString(),
+            limit: limit.toString()
+        });
+        const res = await fetch(`${API_URL}/reviews/my-reviews?${query.toString()}`, {
+            credentials: "include",
+            cache: "no-store"
+        });
+        if (!res.ok) throw new Error(`Failed to fetch my reviews: ${res.status} ${res.statusText}`);
+        return await res.json();
+    },
+
+    async createReview(data: { mealId: string; rating: number; comment?: string }): Promise<any> {
+        const res = await fetch(`${API_URL}/reviews`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message || "Failed to create review");
+        }
+        const result = await res.json();
+        return result.data;
+    },
+
+    async updateReview(id: string, data: { rating: number; comment?: string }): Promise<any> {
+        const res = await fetch(`${API_URL}/reviews/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message || "Failed to update review");
+        }
+        const result = await res.json();
+        return result.data;
+    },
+
+    async deleteReview(id: string): Promise<void> {
+        const res = await fetch(`${API_URL}/reviews/${id}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+        if (!res.ok) {
+            const error = await res.json();
+            throw new Error(error.message || "Failed to delete review");
+        }
+    }
+};
+
 
