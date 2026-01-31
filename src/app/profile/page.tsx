@@ -53,17 +53,7 @@ export default function ProfilePage() {
                     <p className="text-muted-foreground">Manage your account preferences and security.</p>
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                    {session.user?.image ? (
-                        <img
-                            src={session.user.image}
-                            alt={session.user.name || "Profile"}
-                            className="w-16 h-16 rounded-full object-cover border-2 border-border"
-                        />
-                    ) : (
-                        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center border-2 border-border">
-                            <User className="h-8 w-8 text-muted-foreground" />
-                        </div>
-                    )}
+
                     <Button variant="destructive" size="sm" onClick={handleSignOut} className="gap-2">
                         <LogOut className="h-4 w-4" />
                         Sign Out

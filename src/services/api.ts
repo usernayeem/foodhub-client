@@ -282,4 +282,22 @@ export const AdminService = {
     }
 };
 
+export const UserService = {
+    async updateProfile(data: { name?: string; phone?: string; address?: string }): Promise<any> {
+        const res = await fetch(`${API_URL}/users/profile`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+            credentials: "include"
+        });
+        if (!res.ok) throw new Error("Failed to update profile");
+        const result = await res.json();
+        return result.data;
+    },
+
+    async getProfile(): Promise<any> {
+        return null;
+    }
+};
+
 
