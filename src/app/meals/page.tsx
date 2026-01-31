@@ -13,7 +13,8 @@ export default function MealsPage() {
     const [filters, setFilters] = useState<MealFilterState>({
         search: "",
         categoryId: "all",
-        sortBy: "newest"
+        sortBy: "newest",
+        dietary: []
     });
     const [meals, setMeals] = useState<Meal[]>([]);
     const [loading, setLoading] = useState(true);
@@ -34,7 +35,8 @@ export default function MealsPage() {
                     categoryId: filters.categoryId === "all" ? undefined : filters.categoryId,
                     sortBy: filters.sortBy,
                     page: page,
-                    limit: 9 // 3x3 grid
+                    limit: 9, // 3x3 grid
+                    dietary: filters.dietary
                 });
                 setMeals(response.data);
                 setTotalPages(response.meta.totalPages);

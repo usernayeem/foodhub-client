@@ -24,6 +24,7 @@ export interface MealFilterState {
   minPrice?: number;
   maxPrice?: number;
   sortBy: "newest" | "price-asc" | "price-desc";
+  dietary: string[];
 }
 
 export enum OrderStatus {

@@ -11,6 +11,7 @@ export interface GetMealsParams {
     sortOrder?: "asc" | "desc";
     page?: number;
     limit?: number;
+    dietary?: string[];
 }
 
 export const MealService = {
@@ -18,6 +19,11 @@ export const MealService = {
         const query = new URLSearchParams();
         if (params?.search) query.append("search", params.search);
         if (params?.categoryId && params.categoryId !== "all") query.append("categoryId", params.categoryId);
+        if (params?.dietary && params.dietary.length > 0) {
+            if (params.dietary.includes("Vegetarian")) query.append("isVegetarian", "true");
+            if (params.dietary.includes("Vegan")) query.append("isVegan", "true");
+            if (params.dietary.includes("Gluten-Free")) query.append("isGlutenFree", "true");
+        }
         if (params?.sortBy) {
             if (params.sortBy === "price-asc") {
                 query.append("sortBy", "price");
