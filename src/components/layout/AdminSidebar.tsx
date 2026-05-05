@@ -24,6 +24,11 @@ const adminLinks = [
         label: "Categories",
         icon: Utensils,
     },
+    {
+        href: "/admin/analytics",
+        label: "Analytics",
+        icon: Settings, // Using Settings for now as a placeholder for Analytics
+    },
 ];
 
 export function AdminSidebar() {

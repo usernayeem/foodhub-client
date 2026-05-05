@@ -1,7 +1,7 @@
 "use client";
 
 import { DashboardSidebar } from "./DashboardSidebar";
-import { LayoutDashboard, Utensils, ShoppingBag, Settings } from "lucide-react";
+import { LayoutDashboard, Utensils, ShoppingBag, Star } from "lucide-react";
 
 const providerLinks = [
     {
@@ -19,8 +19,13 @@ const providerLinks = [
         label: "Orders",
         icon: ShoppingBag,
     },
+    {
+        href: "/provider/reviews",
+        label: "Reviews",
+        icon: Star,
+    },
 ];
 
 export function ProviderSidebar() {
-    return <DashboardSidebar title="Provider Portal" links={providerLinks} />;
+    return <DashboardSidebar title="Manager Portal" links={providerLinks} />;
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useTheme } from "next-themes"
-import { Menu, Moon, Sun, ShoppingCart, LogOut, User, Settings, CreditCard, Heart, UtensilsCrossed, Info, PhoneCall } from "lucide-react"
+import { Menu, Moon, Sun, ShoppingCart, LogOut, User, Settings, CreditCard, Heart, UtensilsCrossed, Info, PhoneCall, LayoutDashboard, ShoppingBag } from "lucide-react"
 import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import { CartSheet } from "@/components/cart/CartSheet"
@@ -135,13 +135,20 @@ export function Navbar() {
                                                     <span>Profile</span>
                                                 </Link>
                                             </DropdownMenuItem>
+
+                                            <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                                                <Link href="/orders" className="flex items-center">
+                                                    <ShoppingBag className="mr-2 h-4 w-4" />
+                                                    <span>My Orders</span>
+                                                </Link>
+                                            </DropdownMenuItem>
                                             
                                             
                                             {(user?.role === "PROVIDER" || user?.role === "ADMIN") && (
-                                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer text-primary focus:text-primary">
+                                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer text-primary focus:text-primary font-semibold">
                                                     <Link href={user.role === "PROVIDER" ? "/provider" : "/admin"} className="flex items-center">
-                                                        <Settings className="mr-2 h-4 w-4" />
-                                                        <span>Dashboard</span>
+                                                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                                                        <span>{user.role === "ADMIN" ? "Admin Panel" : "Manager Panel"}</span>
                                                     </Link>
                                                 </DropdownMenuItem>
                                             )}
@@ -172,16 +179,31 @@ export function Navbar() {
                         </div>
                     </div>
 
-                    {/* Mobile Menu Button */}
-                    <div className="flex items-center gap-x-2 md:hidden">
+                    {/* Mobile Header Actions */}
+                    <div className="flex items-center gap-x-1 md:hidden">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                            className="rounded-full hover:bg-accent transition-colors h-9 w-9"
+                        >
+                            {theme === "dark" ? (
+                                <Moon className="h-4 w-4 text-blue-400" />
+                            ) : (
+                                <Sun className="h-4 w-4 text-yellow-500" />
+                            )}
+                            <span className="sr-only">Toggle theme</span>
+                        </Button>
+                        
                         <CartSheet />
+                        
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
-                            className="text-primary hover:bg-primary/10 rounded-full"
+                            className="text-primary hover:bg-primary/10 rounded-full h-9 w-9"
                         >
-                            <Menu className="h-6 w-6" />
+                            <Menu className="h-5 w-5" />
                         </Button>
                     </div>
                 </div>
@@ -238,18 +260,6 @@ export function Navbar() {
                             </div>
                         )}
 
-                        <div className="flex items-center justify-between px-4 pt-4 border-t mt-2">
-                            <span className="text-sm text-muted-foreground">Appearance</span>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                                className="rounded-full"
-                            >
-                                {theme === "dark" ? <Moon className="h-5 w-5 mr-2" /> : <Sun className="h-5 w-5 mr-2" />}
-                                {theme === "dark" ? "Dark Mode" : "Light Mode"}
-                            </Button>
-                        </div>
                     </div>
                 </div>
             </div>

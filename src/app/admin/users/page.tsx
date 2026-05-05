@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { AdminService } from "@/services/api";
-import { Button } from "@/components/ui/button";
 import { Loader2, Shield, User as UserIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +12,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { PaginationControls } from "@/components/ui/PaginationControls";
+import { DashboardTable } from "@/components/dashboard/DashboardTable";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
 
 interface User {
     id: string;
@@ -28,18 +28,18 @@ export default function AdminUsersPage() {
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const { toast } = useToast();
-    const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
         loadUsers();
-    }, [page]);
+    }, []);
 
     const loadUsers = async () => {
+        setIsLoading(true);
         try {
-            const response = await AdminService.getAllUsers(page, 10);
+            // Fetching a larger limit to showcase internal pagination if needed, 
+            // or we can rely on server-side pagination by passing page.
+            const response = await AdminService.getAllUsers(1, 100); 
             setUsers(response.data);
-            setTotalPages(response.meta?.totalPages || 1);
         } catch (error) {
             console.error(error);
             toast({
@@ -66,119 +66,123 @@ export default function AdminUsersPage() {
         }
     };
 
-    const getRoleBadge = (role: string) => {
-        const colors: Record<string, string> = {
-            ADMIN: "bg-purple-100 text-purple-800",
-            PROVIDER: "bg-blue-100 text-blue-800",
-            CUSTOMER: "bg-green-100 text-green-800",
-        };
+    const columns = [
+        {
+            header: "User",
+            accessorKey: "name",
+            render: (row: User) => (
+                <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <UserIcon className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium">{row.name}</span>
+                </div>
+            )
+        },
+        {
+            header: "Email",
+            accessorKey: "email",
+        },
+        {
+            header: "Role",
+            accessorKey: "role",
+            render: (row: User) => {
+                const colors: Record<string, string> = {
+                    ADMIN: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+                    PROVIDER: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+                    CUSTOMER: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+                };
+                return (
+                    <Badge className={colors[row.role] || "bg-gray-100 text-gray-800"}>
+                        {row.role}
+                    </Badge>
+                );
+            }
+        },
+        {
+            header: "Status",
+            accessorKey: "status",
+            render: (row: User) => (
+                <Badge variant={row.status === "ACTIVE" ? "success" : "destructive"}>
+                    {row.status}
+                </Badge>
+            )
+        },
+        {
+            header: "Joined",
+            accessorKey: "createdAt",
+            render: (row: User) => new Date(row.createdAt).toLocaleDateString()
+        },
+        {
+            header: "Actions",
+            accessorKey: "id",
+            render: (row: User) => (
+                <Select
+                    value={row.status}
+                    onValueChange={(value) => handleStatusChange(row.id, value)}
+                >
+                    <SelectTrigger className="w-32 h-8">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="ACTIVE">Active</SelectItem>
+                        <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                    </SelectContent>
+                </Select>
+            )
+        }
+    ];
+
+    const stats = [
+        {
+            title: "Total Users",
+            value: users.length,
+            icon: UserIcon,
+        },
+        {
+            title: "Active Users",
+            value: users.filter(u => u.status === "ACTIVE").length,
+            icon: Shield,
+        },
+        {
+            title: "Providers",
+            value: users.filter(u => u.role === "PROVIDER").length,
+            icon: UserIcon,
+        },
+        {
+            title: "Customers",
+            value: users.filter(u => u.role === "CUSTOMER").length,
+            icon: UserIcon,
+        }
+    ];
+
+    if (isLoading && users.length === 0) {
         return (
-            <Badge className={colors[role] || "bg-gray-100 text-gray-800"}>
-                {role}
-            </Badge>
+            <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-muted-foreground animate-pulse">Loading users data...</p>
+            </div>
         );
-    };
-
-    const getStatusBadge = (status: string) => {
-        return status === "ACTIVE" ? (
-            <Badge className="bg-green-100 text-green-800">Active</Badge>
-        ) : (
-            <Badge className="bg-red-100 text-red-800">Suspended</Badge>
-        );
-    };
-
-    if (isLoading) {
-        return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Users Management</h1>
-                <p className="text-muted-foreground">Manage system users and their access.</p>
+        <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="flex flex-col gap-1">
+                <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">
+                    Users Management
+                </h1>
+                <p className="text-muted-foreground">Manage system users and their access levels.</p>
             </div>
 
-            <div className="rounded-md border">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-muted/50">
-                            <tr>
-                                <th className="px-4 py-3 text-left text-sm font-medium">User</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium">Email</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium">Role</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium">Status</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium">Joined</th>
-                                <th className="px-4 py-3 text-left text-sm font-medium">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y">
-                            {users.map((user) => (
-                                <tr key={user.id} className="hover:bg-muted/50">
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <UserIcon className="h-4 w-4" />
-                                            </div>
-                                            <span className="font-medium">{user.name}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3 text-sm text-muted-foreground">{user.email}</td>
-                                    <td className="px-4 py-3">{getRoleBadge(user.role)}</td>
-                                    <td className="px-4 py-3">{getStatusBadge(user.status)}</td>
-                                    <td className="px-4 py-3 text-sm text-muted-foreground">
-                                        {new Date(user.createdAt).toLocaleDateString()}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <Select
-                                            value={user.status}
-                                            onValueChange={(value) => handleStatusChange(user.id, value)}
-                                        >
-                                            <SelectTrigger className="w-32">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="ACTIVE">Active</SelectItem>
-                                                <SelectItem value="SUSPENDED">Suspended</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <DashboardOverview stats={stats} />
 
-            <PaginationControls
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
+            <DashboardTable 
+                title="System Users" 
+                data={users} 
+                columns={columns} 
+                searchKey="name"
+                pageSize={10}
             />
-
-            {users.length === 0 && (
-                <div className="text-center py-12">
-                    <p className="text-muted-foreground">No users found.</p>
-                </div>
-            )}
-
-            <div className="grid gap-4 md:grid-cols-3">
-                <div className="border rounded-lg p-4">
-                    <div className="text-sm text-muted-foreground">Total Users</div>
-                    <div className="text-2xl font-bold">{users.length}</div>
-                </div>
-                <div className="border rounded-lg p-4">
-                    <div className="text-sm text-muted-foreground">Active Users</div>
-                    <div className="text-2xl font-bold">
-                        {users.filter(u => u.status === "ACTIVE").length}
-                    </div>
-                </div>
-                <div className="border rounded-lg p-4">
-                    <div className="text-sm text-muted-foreground">Providers</div>
-                    <div className="text-2xl font-bold">
-                        {users.filter(u => u.role === "PROVIDER").length}
-                    </div>
-                </div>
-            </div>
         </div>
     );
 }

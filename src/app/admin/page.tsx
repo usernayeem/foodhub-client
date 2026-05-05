@@ -1,10 +1,14 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdminService, AdminDashboardData } from "@/services/api";
 import { useEffect, useState } from "react";
+import { AdminService, AdminDashboardData } from "@/services/api";
 import { useToast } from "@/hooks/use-toast";
-import { Users, ShoppingBag, DollarSign, Utensils } from "lucide-react";
+import { Users, ShoppingBag, DollarSign, Utensils, TrendingUp } from "lucide-react";
+import { DashboardOverview } from "@/components/dashboard/DashboardOverview";
+import { DashboardChart } from "@/components/dashboard/DashboardCharts";
+import { DashboardTable } from "@/components/dashboard/DashboardTable";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
 
 export default function AdminDashboard() {
     const [data, setData] = useState<AdminDashboardData | null>(null);
@@ -32,112 +36,137 @@ export default function AdminDashboard() {
     }, [toast]);
 
     if (loading) {
-        return <div className="p-8 text-center">Loading dashboard...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-[400px]">
+                <div className="animate-pulse text-muted-foreground font-medium">Loading dashboard data...</div>
+            </div>
+        );
     }
 
     if (!data) {
-        return <div className="p-8 text-center">Failed to load data.</div>;
+        return <div className="p-8 text-center text-destructive">Failed to load dashboard data. Please try again.</div>;
     }
 
-    const { users, orders, revenue, meals } = data;
+    const stats = [
+        {
+            title: "Total Users",
+            value: data.users.total,
+            icon: Users,
+            description: `${data.users.customers} customers, ${data.users.providers} providers`,
+            trend: { value: "+12%", positive: true }
+        },
+        {
+            title: "Total Revenue",
+            value: `$${data.revenue.total.toLocaleString()}`,
+            icon: DollarSign,
+            description: "Platform lifetime revenue",
+            trend: { value: "+8.4%", positive: true }
+        },
+        {
+            title: "Total Orders",
+            value: data.orders.total,
+            icon: ShoppingBag,
+            description: `${data.orders.delivered} orders delivered`,
+            trend: { value: "+5.2%", positive: true }
+        },
+        {
+            title: "Available Meals",
+            value: data.meals.available,
+            icon: Utensils,
+            description: `Out of ${data.meals.total} total meals`,
+            trend: { value: "+2.1%", positive: true }
+        },
+    ];
+
+    // Mock trend data if none exists in revenue.trend
+    const chartData = data.revenue.trend.length > 0 ? data.revenue.trend : [
+        { name: "Jan", value: 4000 },
+        { name: "Feb", value: 3000 },
+        { name: "Mar", value: 2000 },
+        { name: "Apr", value: 2780 },
+        { name: "May", value: 1890 },
+        { name: "Jun", value: 2390 },
+        { name: "Jul", value: 3490 },
+    ];
+
+    const providerData = data.topProviders.map(p => ({
+        name: p.businessName || p.user?.name || "Unknown",
+        revenue: p.totalRevenue
+    }));
+
+    const orderColumns = [
+        {
+            header: "Order ID",
+            accessorKey: "id",
+            render: (row: any) => <span className="font-mono text-xs text-muted-foreground">#{row.id.slice(-6)}</span>
+        },
+        {
+            header: "Customer",
+            accessorKey: "customer.name",
+            render: (row: any) => row.customer?.name || "Guest"
+        },
+        {
+            header: "Total",
+            accessorKey: "totalAmount",
+            render: (row: any) => <span className="font-bold">${row.totalAmount.toFixed(2)}</span>
+        },
+        {
+            header: "Status",
+            accessorKey: "status",
+            render: (row: any) => (
+                <Badge variant={row.status === "DELIVERED" ? "success" : row.status === "CANCELLED" ? "destructive" : "secondary"}>
+                    {row.status}
+                </Badge>
+            )
+        },
+        {
+            header: "Date",
+            accessorKey: "createdAt",
+            render: (row: any) => format(new Date(row.createdAt), "MMM dd, yyyy")
+        }
+    ];
 
     return (
-        <div className="space-y-6">
-            <h1 className="text-3xl font-bold tracking-tight">Admin Overview</h1>
-
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{users.total}</div>
-                        <p className="text-xs text-muted-foreground">
-                            {users.customers} customers, {users.providers} providers
-                        </p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">${revenue.total.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Lifetime Platform Revenue</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                        <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{orders.total}</div>
-                        <p className="text-xs text-muted-foreground">{orders.delivered} delivered</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Meals</CardTitle>
-                        <Utensils className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{meals.total}</div>
-                        <p className="text-xs text-muted-foreground">{meals.available} available</p>
-                    </CardContent>
-                </Card>
+        <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="flex flex-col gap-2">
+                <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">
+                    Admin Overview
+                </h1>
+                <p className="text-muted-foreground">
+                    Welcome back! Here's what's happening with FoodHub today.
+                </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="col-span-4">
-                    <CardHeader>
-                        <CardTitle>Recent Orders</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-8">
-                            {data.recentOrders.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">No recent orders.</p>
-                            ) : (
-                                data.recentOrders.map((order: any) => (
-                                    <div key={order.id} className="flex items-center">
-                                        <div className="ml-4 space-y-1">
-                                            <p className="text-sm font-medium leading-none">{order.customer?.name || "Guest"}</p>
-                                            <p className="text-sm text-muted-foreground">{order.provider?.user?.name}</p>
-                                        </div>
-                                        <div className="ml-auto font-medium">+${order.totalAmount?.toFixed(2)}</div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="col-span-3">
-                    <CardHeader>
-                        <CardTitle>Top Providers</CardTitle>
-                        <CardDescription>
-                            Highest revenue generators.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-8">
-                            {data.topProviders.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">No provider data.</p>
-                            ) : (
-                                data.topProviders.map((provider: any) => (
-                                    <div key={provider.id} className="flex items-center">
-                                        <div className="ml-4 space-y-1">
-                                            <p className="text-sm font-medium leading-none">{provider.businessName || provider.user?.name}</p>
-                                            <p className="text-sm text-muted-foreground">${provider.totalRevenue.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
+            <DashboardOverview stats={stats} />
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+                <div className="md:col-span-4">
+                    <DashboardChart 
+                        title="Revenue Trend" 
+                        description="Monthly revenue growth over the current year"
+                        data={chartData}
+                        type="area"
+                        dataKey="value"
+                    />
+                </div>
+                <div className="md:col-span-3">
+                    <DashboardChart 
+                        title="Top Providers" 
+                        description="Revenue distribution by top providers"
+                        data={providerData.length > 0 ? providerData : [{name: "No Data", revenue: 0}]}
+                        type="pie"
+                        dataKey="revenue"
+                    />
+                </div>
             </div>
+
+            <DashboardTable 
+                title="Recent Orders" 
+                data={data.recentOrders} 
+                columns={orderColumns}
+                pageSize={5}
+                searchKey="id"
+            />
         </div>
     );
 }

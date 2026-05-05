@@ -2,11 +2,13 @@ import { Order, OrderStatus } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Package, Clock, CheckCircle, XCircle, Truck } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, Truck, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { fetcher } from "@/lib/api";
+import { ReviewService } from "@/services/api";
+import ReviewForm from "../reviews/ReviewForm";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -43,6 +45,7 @@ const statusIconMap: Record<OrderStatus, React.ReactNode> = {
 export function OrderCard({ order, onRefresh }: OrderCardProps) {
     const { toast } = useToast();
     const [isCancelling, setIsCancelling] = useState(false);
+    const [reviewMeal, setReviewMeal] = useState<{ id: string; name: string } | null>(null);
 
     const formattedDate = new Date(order.createdAt).toLocaleDateString("en-US", {
         year: 'numeric',
@@ -76,6 +79,28 @@ export function OrderCard({ order, onRefresh }: OrderCardProps) {
         }
     };
 
+    const handleReview = async (data: { rating: number; comment: string }) => {
+        if (!reviewMeal) return;
+        try {
+            await ReviewService.createReview({
+                mealId: reviewMeal.id,
+                ...data
+            });
+            toast({
+                title: "Review Submitted",
+                description: `Thank you for reviewing ${reviewMeal.name}!`,
+            });
+            setReviewMeal(null);
+            if (onRefresh) onRefresh();
+        } catch (error: any) {
+            toast({
+                title: "Error",
+                description: error.message || "Failed to submit review.",
+                variant: "destructive",
+            });
+        }
+    };
+
     return (
         <Card className="hover:shadow-md transition-shadow flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -96,9 +121,22 @@ export function OrderCard({ order, onRefresh }: OrderCardProps) {
                 <div className="space-y-4">
                     <div className="space-y-2">
                         {order.items.map((item) => (
-                            <div key={item.id} className="flex justify-between text-sm">
-                                <span>{item.quantity}x {item.meal?.name || "Unknown Meal"}</span>
-                                <span className="text-muted-foreground">${(item.price * item.quantity).toFixed(2)}</span>
+                            <div key={item.id} className="flex flex-col gap-1">
+                                <div className="flex justify-between text-sm">
+                                    <span className="font-medium">{item.quantity}x {item.meal?.name || "Unknown Meal"}</span>
+                                    <span className="text-muted-foreground">${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                                {order.status === OrderStatus.DELIVERED && item.meal && (
+                                    <Button 
+                                        variant="ghost" 
+                                        size="sm" 
+                                        className="h-7 text-[10px] w-fit px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1"
+                                        onClick={() => setReviewMeal({ id: item.mealId, name: item.meal?.name || "" })}
+                                    >
+                                        <Star className="w-3 h-3 fill-current" />
+                                        Review Meal
+                                    </Button>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -143,6 +181,13 @@ export function OrderCard({ order, onRefresh }: OrderCardProps) {
                         </AlertDialogContent>
                     </AlertDialog>
                 </CardFooter>
+            )}
+            {reviewMeal && (
+                <ReviewForm 
+                    mealName={reviewMeal.name}
+                    onCancel={() => setReviewMeal(null)}
+                    onSubmit={handleReview}
+                />
             )}
         </Card>
     );
