@@ -63,8 +63,8 @@ export function Navbar() {
                     {/* Logo */}
                     <div className="flex items-center gap-2">
                         <Link href="/" className="flex items-center gap-2 group transition-transform duration-300 active:scale-95">
-                            <div className="bg-primary/10 p-2 rounded-xl group-hover:bg-primary/20 transition-colors">
-                                <span className="text-2xl">🍱</span>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 transition-transform group-hover:scale-110 group-hover:rotate-3">
+                                <UtensilsCrossed className="h-6 w-6" />
                             </div>
                             <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">
                                 FoodHub

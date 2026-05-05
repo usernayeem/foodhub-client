@@ -42,8 +42,8 @@ export function Hero() {
         <div className={styles.content}>
           <span className={styles.tagline}>Welcome to FoodHub</span>
           <h1 className={styles.title}>
-            Delicious Food, <br />
-            <span className="text-primary">Delivered To You</span>
+            Delicious Food, <br className="hidden md:block" />
+            <span className="text-primary"> Delivered To You</span>
           </h1>
           <p className={styles.description}>
             Order from the best local restaurants with easy, on-demand delivery. 
@@ -61,7 +61,7 @@ export function Hero() {
             </Button>
           </div>
 
-          <div className="flex items-center gap-6 mt-4">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 md:gap-6 mt-8">
             <div className="flex -space-x-3">
               {[2, 5, 8, 14].map((i) => (
                 <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-muted overflow-hidden">
